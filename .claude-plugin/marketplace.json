@@ -1,0 +1,14 @@
+{
+  "name": "gummy-berry",
+  "owner": {
+    "name": "Nate — Marula Music",
+    "email": "nate@marulamusic.com"
+  },
+  "plugins": [
+    {
+      "name": "gummy-berry-juce",
+      "source": "./",
+      "description": "Agent framework for JUCE audio plugin development: contract-first pipeline, RT-safety enforcement, cost-tiered agents."
+    }
+  ]
+}

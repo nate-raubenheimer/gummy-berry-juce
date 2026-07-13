@@ -1,0 +1,12 @@
+{
+  "name": "gummy-berry-juce",
+  "version": "0.1.0",
+  "description": "Agent framework for building JUCE audio plugins and instruments with CMake — enforced modern-C++ standards, contract-first pipeline, RT-safety gates, and cost-tiered specialist agents.",
+  "author": {
+    "name": "Nate — Marula Music",
+    "email": "nate@marulamusic.com"
+  },
+  "homepage": "https://github.com/marulamusic/gummy-berry-juce",
+  "license": "MIT",
+  "keywords": ["juce", "audio", "plugin", "dsp", "cmake", "vst3", "realtime"]
+}

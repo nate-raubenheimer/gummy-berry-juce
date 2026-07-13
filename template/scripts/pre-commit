@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# gummy-berry pre-commit hook: format check + RT-safety scan on staged C++ files.
+# Harness-neutral enforcement — binds no matter what editor/agent wrote the code.
+# Install: ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+STAGED=()
+while IFS= read -r -d '' f; do
+  case "$f" in
+    src/*.cpp|src/*.h|src/*.hpp|src/*.cc|tests/*.cpp|tests/*.h) STAGED+=("$f") ;;
+  esac
+done < <(git diff --cached --name-only --diff-filter=ACM -z)
+
+[ ${#STAGED[@]} -eq 0 ] && exit 0
+
+if command -v clang-format >/dev/null 2>&1; then
+  if ! clang-format --dry-run -Werror "${STAGED[@]}" 2>/dev/null; then
+    echo "pre-commit: formatting violations — run: clang-format -i ${STAGED[*]}" >&2
+    exit 1
+  fi
+else
+  echo "pre-commit: WARNING clang-format not installed (brew install clang-format)" >&2
+fi
+
+python3 scripts/rt-check.py "${STAGED[@]}"
