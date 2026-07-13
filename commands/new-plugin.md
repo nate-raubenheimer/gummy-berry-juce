@@ -11,7 +11,7 @@ Follow the full lane, strictly in order:
 Load the **plugin-planning** skill and produce all five contracts in `docs/contracts/` (brief, parameters, architecture, ui, plan). Interview the user; incorporate any existing research documents they point at. Get explicit user approval of the contracts before proceeding.
 
 ## 2. Scaffold
-Copy the `template/` directory from the gummy-berry-juce plugin root into the target project directory, substituting the plugin name, bundle id, and plugin code. Verify the bare scaffold configures and builds (`cmake -B build -DGB_JUCE_PATH="$HOME/JUCE" && cmake --build build`) before writing any feature code.
+Copy the `template/` directory from the gummy-berry-juce plugin root into the target project directory, substituting the plugin name, bundle id, plugin code, and — if this isn't a Marula Music project — the company name and manufacturer code (see the header comment in the template's CMakeLists.txt). Verify the bare scaffold configures and builds (`cmake -B build -DGB_JUCE_PATH="$HOME/JUCE" && cmake --build build`, pointing GB_JUCE_PATH at a local JUCE checkout if you have one) before writing any feature code.
 
 ## 3. Staged build — sequential, gated
 Stages: **shell → DSP → UI → validate**. For each stage:

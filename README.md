@@ -21,10 +21,11 @@ One writer, many specialists, hard gates. The main session plans and writes all 
 ## Install
 
 ```bash
-# marketplace-style local install
-claude plugin marketplace add ~/Projects/"Gummy Berry JUCE"
+claude plugin marketplace add marulamusic/gummy-berry-juce   # or a local clone path
 claude plugin install gummy-berry-juce@gummy-berry
 ```
+
+When scaffolding your own plugins from `template/`, substitute the company/bundle placeholders (`COMPANY_NAME`, `BUNDLE_ID`, `PLUGIN_MANUFACTURER_CODE`) along with the plugin name — see the header comment in `template/CMakeLists.txt`.
 
 Local tooling the gate expects: `brew install cmake clang-format llvm && brew install --cask pluginval`.
 

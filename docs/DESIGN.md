@@ -51,8 +51,8 @@ Decisions are expensive to get wrong and cheap to buy well: planning/review on t
 
 ## Template notes
 
-- Pamplejuce-informed mechanics (VERSION file, Catch2+CTest, pluginval CI, warnings-as-errors) on Nate's proven `src/tests/ui/docs` conventions, WebView editor pattern lifted from Prisma (proven on this machine).
-- Plugin + test targets compile the sources twice (Prisma-proven `juce_add_console_app` approach) — JUCE's plugin defines make true single-compile shared libs more trouble than the compile time saves at this project size.
+- Pamplejuce-informed mechanics (VERSION file, Catch2+CTest, pluginval CI, warnings-as-errors) on a proven `src/tests/ui/docs` layout; the WebView editor pattern is lifted from shipped in-house plugins.
+- Plugin + test targets compile the sources twice (via `juce_add_console_app`, proven in prior projects) — JUCE's plugin defines make true single-compile shared libs more trouble than the compile time saves at this project size.
 - `ui/js/juce/` is synced from the JUCE checkout at configure time and gitignored.
 
 ## Deferred (explicitly)
@@ -63,4 +63,4 @@ Decisions are expensive to get wrong and cheap to buy well: planning/review on t
 
 ## First validation target
 
-Spook (MIDI plugin, research already in `~/Projects/Spook`) runs the full lane end-to-end; every friction point becomes a framework fix and a `critical-patterns.md` entry.
+An in-house MIDI plugin (already researched, not yet built) runs the full lane end-to-end; every friction point becomes a framework fix and a `critical-patterns.md` entry.

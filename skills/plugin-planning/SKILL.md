@@ -34,7 +34,7 @@ Rules: ids are `snake_case`, stable forever, versioned `ParameterID{id, 1}`. Ran
 - Layout description or reference to Figma/mockups
 - Every control mapped to a parameter id from parameters.md (bijection check: no orphan controls, no unbound parameters unless listed as internal)
 - Metering/visualization data needs → each named as an audio→UI channel in architecture.md
-- marula-ui components used; size, resizability
+- Shared component-library controls used; size, resizability
 
 ### 5. `docs/contracts/plan.md`
 Staged build plan: **shell → DSP → UI → validate**, each stage a checklist of tasks small enough to complete and gate independently. Each stage ends with: gate passes (`scripts/gate.sh`) + code-reviewer pass against these contracts. Note per-task delegation: mechanical items marked for the mechanic agent, research items for the researcher.
@@ -43,4 +43,4 @@ Staged build plan: **shell → DSP → UI → validate**, each stage a checklist
 
 - No code before contracts are complete and user-approved.
 - If mid-build reality contradicts a contract, STOP: surface it, re-plan explicitly, update the contract with a changelog note.
-- Spook-style prior research (market/feasibility reports) feeds the brief; link it, don't duplicate it.
+- Prior research (market/feasibility reports) feeds the brief; link it, don't duplicate it.

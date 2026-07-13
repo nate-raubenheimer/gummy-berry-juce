@@ -1,6 +1,7 @@
 # gummy-berry-juce plugin template.
 # Scaffold substitutions: GummyPlugin (target/product), gummyplugin (bundle id),
-# Gbp1 (plugin code — unique 4 chars, first uppercase), IS_SYNTH/MIDI flags.
+# Gbp1 (plugin code — unique 4 chars, first uppercase), IS_SYNTH/MIDI flags,
+# and your own COMPANY_NAME / BUNDLE_ID prefix / PLUGIN_MANUFACTURER_CODE.
 cmake_minimum_required(VERSION 3.25)
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" GB_VERSION)
@@ -117,7 +118,7 @@ FetchContent_Declare(Catch2
 FetchContent_MakeAvailable(Catch2)
 
 # Console app so plugin sources compile with JUCE module defines; PluginEditor
-# compiles in so createEditor() links (matches the proven Prisma setup).
+# compiles in so createEditor() links.
 juce_add_console_app(GummyPluginTests PRODUCT_NAME "GummyPluginTests"
     NEEDS_WEB_BROWSER TRUE
     NEEDS_WEBVIEW2 TRUE)

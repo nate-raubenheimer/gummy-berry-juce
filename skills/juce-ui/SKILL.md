@@ -1,11 +1,11 @@
 ---
 name: juce-ui
-description: WebView-first UI development for JUCE 8 plugins — WebBrowserComponent hosting, JS-C++ parameter bridge, resource embedding, meter polling, and marula-ui conventions. Load when building or modifying any plugin UI.
+description: WebView-first UI development for JUCE 8 plugins — WebBrowserComponent hosting, JS-C++ parameter bridge, resource embedding, meter polling, and shared component-library conventions. Load when building or modifying any plugin UI.
 ---
 
 # JUCE UI — WebView-First
 
-Doctrine: UIs are **HTML/CSS/JS hosted in `juce::WebBrowserComponent`** (JUCE 8), matching Prisma/SKOP/Modjadji/Cassiopeia. Native Components are the exception (heavy GL visualizers, minimal-footprint plugins) and need explicit justification.
+Doctrine: UIs are **HTML/CSS/JS hosted in `juce::WebBrowserComponent`** (JUCE 8). Native Components are the exception (heavy GL visualizers, minimal-footprint plugins) and need explicit justification.
 
 ## Structure
 
@@ -28,10 +28,10 @@ Editor hosts the WebView with `WebBrowserComponent::Options` → `.withNativeInt
 
 Audio thread → atomic/FIFO → **message-thread `juce::Timer`** (30–60 Hz) → single batched event to the WebView. Never per-sample events, never audio-thread emission ([rt-safety](../rt-safety/SKILL.md)).
 
-## marula-ui conventions
+## Component-library conventions
 
-- Shared component library lives in `~/Projects/marula-ui` — reuse its controls/CSS before writing new ones; new generally-useful controls go back into it.
-- Design source of truth: the project's Figma file / `docs/contracts/ui.md`. Match it; don't freelance aesthetics.
+- If a shared UI component library exists (its location is named in the project's AGENTS.md/CLAUDE.md), reuse its controls/CSS before writing new ones; new generally-useful controls go back into it.
+- Design source of truth: the project's design files / `docs/contracts/ui.md`. Match it; don't freelance aesthetics.
 - Test in the Standalone build first (fastest loop), then verify in a real host — WebView sizing/focus behaves differently hosted.
 
 ## Native path (secondary)
