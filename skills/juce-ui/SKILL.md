@@ -16,7 +16,7 @@ ui/
 └── js/               # bridge + controls; no build step unless the project opts in
 ```
 
-Editor hosts the WebView with `WebBrowserComponent::Options` → `.withNativeIntegrationEnabled(true)` → resource provider serving from BinaryData (release) or disk (dev hot-reload flag `GB_UI_HOT_RELOAD`).
+Editor hosts the WebView with `WebBrowserComponent::Options` → `.withNativeIntegrationEnabled(true)` → resource provider serving from BinaryData (release) or disk (dev hot-reload flag `GB_UI_DIR`).
 
 ## Parameter bridge — the rules
 
