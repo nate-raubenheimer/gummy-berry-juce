@@ -69,7 +69,7 @@ Caveat: `AudioProcessor::wrapperType` is `Undefined` in CLAP builds — don't br
 
 9. **AAX**: deliberately not supported until a plugin needs Pro Tools (PACE signing ceremony not worth speculative support).
 
-10. **WebView UI assets** are zipped into the binary via `juce_add_binary_data` (or `WebBrowserComponent::Resource` provider streaming from BinaryData). Dev builds may serve from disk behind a `GB_UI_HOT_RELOAD` flag; release always embeds.
+10. **WebView UI assets** are zipped into the binary via `juce_add_binary_data` (or `WebBrowserComponent::Resource` provider streaming from BinaryData). Dev builds may serve from disk behind a `GB_UI_DIR` flag; release always embeds.
 
 ## Format & platform policy
 

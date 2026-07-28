@@ -43,6 +43,38 @@ endif()
 file(COPY "${GB_JUCE_JS_DIR}/index.js" "${GB_JUCE_JS_DIR}/check_native_interop.js"
      DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/ui/js/juce")
 
+# 8.2 (AUD-88): the WebView UI (ui/js/main.js + ui/css/main.css, which imports
+# the JUCE frontend library copied above as a relative ES module) is bundled
+# by esbuild (ui/build.mjs) into ui/dist/main.{js,css}. juce_add_binary_data
+# (below) embeds file contents at CONFIGURE time, so the bundle must exist on
+# disk before that call runs -- hence the synchronous npm install/build here.
+# A custom command further below additionally reruns the bundler at BUILD
+# time whenever ui/js or ui/css change, so `cmake --build` alone (no
+# reconfigure) picks up UI edits.
+find_program(NPM_EXECUTABLE npm)
+if(NOT NPM_EXECUTABLE)
+    message(FATAL_ERROR
+        "GummyPlugin: npm not found on PATH. Node.js/npm is a required build "
+        "dependency for the WebView UI bundle (ui/build.mjs, esbuild) -- "
+        "install Node.js and reconfigure.")
+endif()
+
+execute_process(
+    COMMAND ${NPM_EXECUTABLE} install
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ui
+    RESULT_VARIABLE GB_UI_NPM_INSTALL_RESULT)
+if(NOT GB_UI_NPM_INSTALL_RESULT EQUAL 0)
+    message(FATAL_ERROR "GummyPlugin: `npm install` failed in ui/ (exit ${GB_UI_NPM_INSTALL_RESULT}).")
+endif()
+
+execute_process(
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ui
+    RESULT_VARIABLE GB_UI_NPM_BUILD_RESULT)
+if(NOT GB_UI_NPM_BUILD_RESULT EQUAL 0)
+    message(FATAL_ERROR "GummyPlugin: `npm run build` failed in ui/ (exit ${GB_UI_NPM_BUILD_RESULT}).")
+endif()
+
 juce_add_plugin(GummyPlugin
     COMPANY_NAME "Marula Music"
     BUNDLE_ID com.marulamusic.gummyplugin
@@ -79,16 +111,41 @@ target_include_directories(GummyPlugin PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 target_compile_definitions(GummyPlugin PUBLIC ${GB_COMPILE_DEFS})
 target_compile_options(GummyPlugin PRIVATE ${GB_WERROR})
 
+# Rebuild the UI bundle at BUILD time (not just configure time) whenever its
+# inputs change, so `cmake --build` alone picks up UI edits without a
+# reconfigure. juce_add_binary_data's own custom command (JUCE's
+# JUCEUtils.cmake) already DEPENDS on ui/dist/main.{js,css} and reruns
+# juceaide whenever their mtimes change -- this command is what keeps those
+# mtimes honest.
+file(GLOB_RECURSE GB_UI_SOURCE_FILES CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/js/*.js
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/css/*.css)
+
+add_custom_command(
+    OUTPUT
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/dist/main.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/dist/main.css
+    COMMAND ${NPM_EXECUTABLE} run build
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ui
+    DEPENDS ${GB_UI_SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/ui/build.mjs
+    COMMENT "GummyPlugin: bundling WebView UI (esbuild)"
+    VERBATIM)
+
+add_custom_target(GummyPluginUIBundle
+    DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/dist/main.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/dist/main.css)
+
 # WebView UI assets, embedded as binary data.
 juce_add_binary_data(GummyPluginUI
     HEADER_NAME GummyPluginUIData.h
     NAMESPACE GummyPluginUI
     SOURCES
         ui/index.html
-        ui/css/main.css
-        ui/js/main.js
-        ui/js/juce/index.js
-        ui/js/juce/check_native_interop.js)
+        ui/dist/main.css
+        ui/dist/main.js)
+
+add_dependencies(GummyPluginUI GummyPluginUIBundle)
 
 target_link_libraries(GummyPlugin
     PRIVATE

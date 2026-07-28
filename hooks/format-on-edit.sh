@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# gummy-berry-juce: auto-apply clang-format to edited C++ files.
+# gummy-berry-juce: auto-apply clang-format to edited C++ files, and
+# prettier to edited web-UI assets (ui/ HTML/CSS/JS/TS/JSON).
 # Harness-agnostic: reads hook JSON from stdin, accepts both Claude Code
 # (snake_case, matcher-filtered) and VS Code Copilot (camelCase, no matchers).
 set -u
@@ -22,16 +23,28 @@ print(ti.get("file_path") or ti.get("filePath") or "")
 [ -n "${FILE_PATH:-}" ] || exit 0
 case "$FILE_PATH" in
   *.cpp|*.h|*.hpp|*.cc|*.cxx) ;;
+  *.html|*.css|*.js|*.jsx|*.ts|*.tsx|*.json) ;;
   *) exit 0 ;;
 esac
 [ -f "$FILE_PATH" ] || exit 0
 
 # Skip generated/vendored code
 case "$FILE_PATH" in
-  */build/*|*_artefacts/*|*/JuceLibraryCode/*|*/JUCE/*|*/modules/*) exit 0 ;;
+  */build/*|*_artefacts/*|*/JuceLibraryCode/*|*/JUCE/*|*/modules/*|*/node_modules/*|*/dist/*) exit 0 ;;
 esac
 
-if command -v clang-format >/dev/null 2>&1; then
-  clang-format -i "$FILE_PATH" 2>/dev/null
-fi
+case "$FILE_PATH" in
+  *.cpp|*.h|*.hpp|*.cc|*.cxx)
+    if command -v clang-format >/dev/null 2>&1; then
+      clang-format -i "$FILE_PATH" 2>/dev/null
+    fi
+    ;;
+  *.html|*.css|*.js|*.jsx|*.ts|*.tsx|*.json)
+    if command -v prettier >/dev/null 2>&1; then
+      prettier --write "$FILE_PATH" 2>/dev/null
+    elif command -v npx >/dev/null 2>&1; then
+      npx --no-install prettier --write "$FILE_PATH" >/dev/null 2>&1
+    fi
+    ;;
+esac
 exit 0
