@@ -6,7 +6,7 @@ This project is built with the **gummy-berry-juce** framework. These instruction
 
 1. **Real-time safety**: no allocation, locks, I/O, or logging anywhere in the audio-thread call graph (`processBlock` and everything it reaches). The full rules and approved patterns are in the framework's `standards/10-realtime-rules.md`; the `rt-check` scan and code review enforce them.
 2. **Contracts are law**: `docs/contracts/` (brief, parameters, architecture, ui, plan) is the source of truth. Parameter ids, ranges, defaults, and smoothing come from `docs/contracts/parameters.md` — never invent or change them ad hoc. Contract changes are explicit, user-approved re-planning events.
-3. **The gate decides done**: `scripts/gate.sh` (build with warnings-as-errors → clang-tidy → tests → pluginval strictness 10) must pass before any task is complete. Never weaken the gate to pass it.
+3. **The gate decides done**: `scripts/gate.sh` (build with warnings-as-errors → clang-tidy → tests → pluginval strictness 10 → ship-safety assertion) must pass before any task is complete. Never weaken the gate to pass it.
 4. **Tests**: TDD for logic (parameters, state, MIDI); DSP may be prototyped freely but must ship spec + characterization tests before merge (matrix: 44.1/48/96 kHz × block sizes 1/16/333/4096, no NaN/inf/denormals).
 5. **One writer at a time** — never parallel edits to this codebase.
 
