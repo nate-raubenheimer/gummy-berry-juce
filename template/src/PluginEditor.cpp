@@ -7,37 +7,51 @@ namespace
     constexpr int baseW = 480, baseH = 320;
 
     const char* const sliderParamIds[] = { "gain" };
-    const char* const* toggleParamIds  = nullptr;   // none yet
-    const char* const* comboParamIds   = nullptr;   // none yet
+    const char* const* toggleParamIds = nullptr; // none yet
+    const char* const* comboParamIds = nullptr;  // none yet
     constexpr size_t numToggles = 0, numCombos = 0;
 
-    struct Asset { const char* path; const char* resource; const char* mime; };
+    // 8.2 (AUD-88): ui/js/main.js (which imports the JUCE frontend relay
+    // library, ui/js/juce/index.js, as a relative ES import) and ui/css/main.css
+    // are now bundled by esbuild into ui/dist/main.{js,css} at CMake configure
+    // time (CMakeLists.txt) -- this list mirrors CMakeLists.txt's
+    // juce_add_binary_data SOURCES exactly.
+    struct Asset
+    {
+        const char* path;
+        const char* resource;
+        const char* mime;
+    };
     const Asset assets[] = {
-        { "/",                                "index_html",              "text/html" },
-        { "/index.html",                      "index_html",              "text/html" },
-        { "/css/main.css",                    "main_css",                "text/css" },
-        { "/js/main.js",                      "main_js",                 "text/javascript" },
-        { "/js/juce/index.js",                "index_js",                "text/javascript" },
-        { "/js/juce/check_native_interop.js", "check_native_interop_js", "text/javascript" },
+        { "/", "index_html", "text/html" },
+        { "/index.html", "index_html", "text/html" },
+        { "/dist/main.css", "main_css", "text/css" },
+        { "/dist/main.js", "main_js", "text/javascript" },
     };
 
     const char* mimeForFile (const juce::String& name)
     {
-        if (name.endsWith (".html"))  return "text/html";
-        if (name.endsWith (".css"))   return "text/css";
-        if (name.endsWith (".js"))    return "text/javascript";
-        if (name.endsWith (".woff2")) return "font/woff2";
-        if (name.endsWith (".svg"))   return "image/svg+xml";
+        if (name.endsWith (".html"))
+            return "text/html";
+        if (name.endsWith (".css"))
+            return "text/css";
+        if (name.endsWith (".js"))
+            return "text/javascript";
+        if (name.endsWith (".woff2"))
+            return "font/woff2";
+        if (name.endsWith (".svg"))
+            return "image/svg+xml";
         return "application/octet-stream";
     }
-}
+} // namespace
 
 //==============================================================================
 GummyPluginAudioProcessorEditor::GummyPluginAudioProcessorEditor (GummyPluginAudioProcessor& p)
-    : AudioProcessorEditor (p), proc (p),
-      webView ((createRelays(), makeOptions()))
+    : AudioProcessorEditor (p)
+    , proc (p)
+    , webView ((createRelays (), makeOptions ()))
 {
-    auto& apvts = proc.apvts();
+    auto& apvts = proc.apvts ();
 
     for (size_t i = 0; i < std::size (sliderParamIds); ++i)
         if (auto* param = apvts.getParameter (sliderParamIds[i]))
@@ -55,24 +69,24 @@ GummyPluginAudioProcessorEditor::GummyPluginAudioProcessorEditor (GummyPluginAud
                 std::make_unique<juce::WebComboBoxParameterAttachment> (*param, *comboRelays[i], nullptr));
 
     addAndMakeVisible (webView);
-    webView.goToURL (juce::WebBrowserComponent::getResourceProviderRoot());
+    webView.goToURL (juce::WebBrowserComponent::getResourceProviderRoot ());
 
     setResizable (true, true);
     setResizeLimits (baseW / 2, baseH / 2, baseW * 2, baseH * 2);
-    if (auto* constrainer = getConstrainer())
+    if (auto* constrainer = getConstrainer ())
         constrainer->setFixedAspectRatio ((double) baseW / baseH);
     setSize (baseW, baseH);
 }
 
-GummyPluginAudioProcessorEditor::~GummyPluginAudioProcessorEditor() = default;
+GummyPluginAudioProcessorEditor::~GummyPluginAudioProcessorEditor () = default;
 
-void GummyPluginAudioProcessorEditor::resized()
+void GummyPluginAudioProcessorEditor::resized ()
 {
-    webView.setBounds (getLocalBounds());
+    webView.setBounds (getLocalBounds ());
 }
 
 //==============================================================================
-void GummyPluginAudioProcessorEditor::createRelays()
+void GummyPluginAudioProcessorEditor::createRelays ()
 {
     for (auto* id : sliderParamIds)
         sliderRelays.push_back (std::make_unique<juce::WebSliderRelay> (id));
@@ -82,31 +96,33 @@ void GummyPluginAudioProcessorEditor::createRelays()
         comboRelays.push_back (std::make_unique<juce::WebComboBoxRelay> (comboParamIds[i]));
 }
 
-juce::WebBrowserComponent::Options GummyPluginAudioProcessorEditor::makeOptions()
+juce::WebBrowserComponent::Options GummyPluginAudioProcessorEditor::makeOptions ()
 {
     auto safeThis = juce::Component::SafePointer<GummyPluginAudioProcessorEditor> (this);
 
     auto options =
-        juce::WebBrowserComponent::Options{}
-           #if JUCE_WINDOWS
+        juce::WebBrowserComponent::Options {}
+#if JUCE_WINDOWS
             .withBackend (juce::WebBrowserComponent::Options::Backend::webview2)
             .withWinWebView2Options (
-                juce::WebBrowserComponent::Options::WinWebView2{}
+                juce::WebBrowserComponent::Options::WinWebView2 {}
                     .withUserDataFolder (juce::File::getSpecialLocation (juce::File::tempDirectory)))
-           #endif
-            .withNativeIntegrationEnabled()
-            .withKeepPageLoadedWhenBrowserIsHidden()
+#endif
+            .withNativeIntegrationEnabled ()
+            .withKeepPageLoadedWhenBrowserIsHidden ()
             .withResourceProvider ([safeThis] (const auto& url)
-                                   -> std::optional<juce::WebBrowserComponent::Resource>
-            {
+                                       -> std::optional<juce::WebBrowserComponent::Resource>
+                                   {
                 if (safeThis == nullptr) return std::nullopt;
-                return safeThis->getResource (url);
-            },
-            juce::String ("*")); // CORS header — required for ES module loading
+                return safeThis->getResource (url); },
+                                   juce::String ("*")); // CORS header — required for ES module loading
 
-    for (auto& relay : sliderRelays) options = options.withOptionsFrom (*relay);
-    for (auto& relay : toggleRelays) options = options.withOptionsFrom (*relay);
-    for (auto& relay : comboRelays)  options = options.withOptionsFrom (*relay);
+    for (auto& relay : sliderRelays)
+        options = options.withOptionsFrom (*relay);
+    for (auto& relay : toggleRelays)
+        options = options.withOptionsFrom (*relay);
+    for (auto& relay : comboRelays)
+        options = options.withOptionsFrom (*relay);
 
     return options;
 }
@@ -123,27 +139,30 @@ GummyPluginAudioProcessorEditor::getResource (const juce::String& url) const
         const auto rel = url == "/" ? juce::String ("index.html")
                                     : url.fromFirstOccurrenceOf ("/", false, false);
         auto file = base.getChildFile (rel);
-        if (file.isAChildOf (base) && file.existsAsFile())
+        if (file.isAChildOf (base) && file.existsAsFile ())
         {
             juce::MemoryBlock mb;
             file.loadFileAsData (mb);
-            const auto* bytes = static_cast<const std::byte*> (mb.getData());
+            const auto* bytes = static_cast<const std::byte*> (mb.getData ());
             return juce::WebBrowserComponent::Resource {
-                std::vector<std::byte> (bytes, bytes + mb.getSize()),
-                juce::String (mimeForFile (file.getFileName())) };
+                std::vector<std::byte> (bytes, bytes + mb.getSize ()),
+                juce::String (mimeForFile (file.getFileName ()))
+            };
         }
     }
 
     for (const auto& asset : assets)
     {
-        if (url != asset.path) continue;
+        if (url != asset.path)
+            continue;
         int size = 0;
         if (const auto* data = GummyPluginUI::getNamedResource (asset.resource, size))
         {
             const auto* bytes = reinterpret_cast<const std::byte*> (data);
             return juce::WebBrowserComponent::Resource {
                 std::vector<std::byte> (bytes, bytes + static_cast<size_t> (size)),
-                juce::String (asset.mime) };
+                juce::String (asset.mime)
+            };
         }
     }
     return std::nullopt;

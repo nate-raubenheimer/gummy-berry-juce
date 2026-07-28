@@ -16,7 +16,7 @@ This project is built with the **gummy-berry-juce** framework. These instruction
 - UI is a JUCE 8 WebView (`ui/` = HTML/CSS/JS); parameters bridge via relay + attachment pairs in `src/PluginEditor.cpp`. Dev hot-reload: set `GB_UI_DIR=$PWD/ui`.
 - Local JUCE checkout: configure with `-DGB_JUCE_PATH="$HOME/JUCE"` to skip the network fetch.
 - Build: `cmake -B build && cmake --build build`. Fast loop: the Standalone target.
-- `.clang-format` is applied automatically — never hand-format. `build*/` and `ui/js/juce/` are generated — never edit.
+- `.clang-format` is applied automatically — never hand-format. `build*/`, `ui/js/juce/`, and `ui/dist/` are generated — never edit. The WebView UI (`ui/js`, `ui/css`) is bundled by esbuild (`ui/build.mjs`) into `ui/dist/main.{js,css}`; CMake runs `npm run build` at configure time and reruns it at build time when UI sources change (no reconfigure needed).
 
 ## Workflow
 
