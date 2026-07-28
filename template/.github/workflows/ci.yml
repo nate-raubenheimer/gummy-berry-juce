@@ -31,6 +31,8 @@ jobs:
           unzip -q pluginval_macOS.zip
           VST3="$(find build -name '*.vst3' -path '*Release*' -print -quit)"
           pluginval.app/Contents/MacOS/pluginval --strictness-level 10 --validate "$VST3"
+      - name: Ship-safety assertion (AUD-89)
+        run: scripts/ship-safety-check.sh build
 
   windows:
     runs-on: windows-latest

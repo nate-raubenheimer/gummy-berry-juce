@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# gummy-berry quality gate: build (-Werror) → clang-tidy → tests → pluginval 10.
-# Blocking and sequential. A red gate means the task is NOT done.
+# gummy-berry quality gate: build (-Werror) → clang-tidy → tests → pluginval 10
+# → ship-safety assertion. Blocking and sequential. A red gate means the task
+# is NOT done.
 # Usage: scripts/gate.sh  (from the project root; honors GB_JUCE_PATH env var)
 set -euo pipefail
 
@@ -20,19 +21,19 @@ if [ ${#missing[@]} -gt 0 ]; then
   exit 1
 fi
 
-echo "=== GATE 1/4: configure + build (Release, warnings-as-errors) ==="
+echo "=== GATE 1/5: configure + build (Release, warnings-as-errors) ==="
 cmake -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=Release \
       -DGB_WARNINGS_AS_ERRORS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
       "${JUCE_ARG[@]}"
 cmake --build "$BUILD_DIR" --parallel
 
-echo "=== GATE 2/4: clang-tidy (project sources) ==="
+echo "=== GATE 2/5: clang-tidy (project sources) ==="
 find src -name '*.cpp' -print0 | xargs -0 clang-tidy -p "$BUILD_DIR" --quiet
 
-echo "=== GATE 3/4: tests (CTest) ==="
+echo "=== GATE 3/5: tests (CTest) ==="
 ctest --test-dir "$BUILD_DIR" --output-on-failure
 
-echo "=== GATE 4/4: pluginval --strictness-level 10 ==="
+echo "=== GATE 4/5: pluginval --strictness-level 10 ==="
 VST3="$BUILD_DIR/${PROJECT_NAME}_artefacts/Release/VST3/${PROJECT_NAME}.vst3"
 if [ ! -d "$VST3" ]; then
   # PRODUCT_NAME may differ from the target name; take the first .vst3 found
@@ -40,5 +41,8 @@ if [ ! -d "$VST3" ]; then
 fi
 [ -n "$VST3" ] && [ -d "$VST3" ] || { echo "GATE: VST3 artefact not found" >&2; exit 1; }
 pluginval --strictness-level 10 --validate "$VST3"
+
+echo "=== GATE 5/5: ship-safety assertion (no studio/agent in release, AUD-89) ==="
+scripts/ship-safety-check.sh "$BUILD_DIR"
 
 echo "=== GATE PASSED ==="
