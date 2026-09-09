@@ -21,7 +21,7 @@ One writer, many specialists, hard gates. The main session plans and writes all 
 ## Install
 
 ```bash
-claude plugin marketplace add marulamusic/gummy-berry-juce   # or a local clone path
+claude plugin marketplace add nate-raubenheimer/gummy-berry-juce   # or a local clone path
 claude plugin install gummy-berry-juce@gummy-berry
 ```
 

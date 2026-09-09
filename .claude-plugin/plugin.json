@@ -6,7 +6,7 @@
     "name": "Nate — Marula Music",
     "email": "nate@marulamusic.com"
   },
-  "homepage": "https://github.com/marulamusic/gummy-berry-juce",
+  "homepage": "https://github.com/nate-raubenheimer/gummy-berry-juce",
   "license": "MIT",
   "keywords": ["juce", "audio", "plugin", "dsp", "cmake", "vst3", "realtime"]
 }
